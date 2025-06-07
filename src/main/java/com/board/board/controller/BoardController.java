@@ -45,4 +45,7 @@ public class BoardController {
 		ListType<BoardDto> response = boardService.getAll();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+
+	//게시판 단일 조회
+	// public ResponseEntity<BoardDto> getOne()
 }

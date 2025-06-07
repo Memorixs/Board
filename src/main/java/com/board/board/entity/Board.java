@@ -49,7 +49,8 @@ public class Board {
 
 	public static List<BoardDto> entityToDto(List<Board> boards) {
 		return boards.stream()
-			.map(board -> new BoardDto(board.getTitle(), board.getContent()))
+			.map(board ->
+				new BoardDto(board.getId(), board.getTitle(), board.getContent(), board.getCreatedAt(), board.getUpdatedAt()))
 			.toList();
 	}
 
