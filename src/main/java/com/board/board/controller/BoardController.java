@@ -5,14 +5,17 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.board.board.dto.BoardDto;
 import com.board.board.dto.CreateBoardDto;
 import com.board.board.dto.ListType;
+import com.board.board.entity.Board;
 import com.board.board.service.BoardService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,5 +50,16 @@ public class BoardController {
 	}
 
 	//게시판 단일 조회
-	// public ResponseEntity<BoardDto> getOne()
+	@GetMapping("/{id}")
+	public ResponseEntity<Object> getById(@PathVariable Long id) {
+		BoardDto response = null;
+		try{
+			response = boardService.getById(id);
+		} catch(RuntimeException e) {
+			log.info(e.getMessage());
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 }

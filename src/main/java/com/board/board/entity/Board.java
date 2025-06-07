@@ -54,5 +54,10 @@ public class Board {
 			.toList();
 	}
 
+	public static BoardDto entityToDto(Board board) {
+		return new BoardDto(board.getId(), board.getTitle(), board.getContent(), board.getCreatedAt(),
+			board.getUpdatedAt());
+	}
+
 
 }

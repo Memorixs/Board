@@ -59,4 +59,10 @@ public class BoardService {
 		List<BoardDto> response = Board.entityToDto(boards);
 		return new ListType<BoardDto>(response.size(), response);
 	}
+
+	public BoardDto getById(Long id) {
+		Board board = boardRepository.findById(id)
+			.orElseThrow(() -> new RuntimeException("게시판이 존재하지 않습니다."));
+		return Board.entityToDto(board);
+	}
 }
