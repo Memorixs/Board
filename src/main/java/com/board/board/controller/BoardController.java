@@ -66,14 +66,14 @@ public class BoardController {
 
 	@PatchMapping("/{id}")
 	public ResponseEntity<Object> updateById(@PathVariable Long id, @RequestBody CreateBoardDto requestDto, HttpServletRequest request, HttpSession session) {
-		Board board = null;
+		BoardDto response = null;
 		try {
-			board = boardService.updateById(id, requestDto, request, session);
+			response = boardService.updateById(id, requestDto, request, session);
 		} catch(RuntimeException e) {
 			log.info(e.getMessage());
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
-		return new ResponseEntity<>(board, HttpStatus.OK);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 
 	}
 }

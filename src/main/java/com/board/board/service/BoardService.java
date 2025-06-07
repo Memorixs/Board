@@ -69,7 +69,7 @@ public class BoardService {
 	}
 
 	@Transactional
-	public Board updateById(Long id, CreateBoardDto requestDto, HttpServletRequest request, HttpSession session) {
+	public BoardDto updateById(Long id, CreateBoardDto requestDto, HttpServletRequest request, HttpSession session) {
 		String userId = getUserIdFromCookie(request);
 		User user = getUserById(session, userId);
 		Board board = findById(id);
@@ -78,7 +78,7 @@ public class BoardService {
 			throw new RuntimeException("수정할 권한이 없습니다.");
 		}
 		board.update(requestDto);
-		return board;
+		return new BoardDto(board.getId(), board.getTitle(), board.getContent(), board.getCreatedAt(), board.getUpdatedAt());
 	}
 
 	private boolean checkAuthorization(Long userId, Board board) {
