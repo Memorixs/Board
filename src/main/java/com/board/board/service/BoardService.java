@@ -89,4 +89,15 @@ public class BoardService {
 		return boardRepository.findById(id)
 			.orElseThrow(() -> new RuntimeException("게시판이 존재하지 않습니다."));
 	}
+
+	@Transactional
+	public void deleteById(Long id, HttpServletRequest request, HttpSession session) {
+		String userId = getUserIdFromCookie(request);
+		User user = getUserById(session, userId);
+		Board board = findById(id);
+		if (!checkAuthorization(user.getId(), board)) {
+			throw new RuntimeException("삭제할 권한이 없습니다.");
+		}
+		boardRepository.deleteById(id);
+	}
 }

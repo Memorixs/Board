@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,11 +33,12 @@ public class BoardController {
 	private final BoardService boardService;
 
 	@PostMapping
-	public ResponseEntity<String> create(HttpServletRequest request, @RequestBody CreateBoardDto requestDto, HttpSession session){
+	public ResponseEntity<String> create(HttpServletRequest request, @RequestBody CreateBoardDto requestDto,
+		HttpSession session) {
 		Long id;
-		try{
+		try {
 			id = boardService.save(requestDto, session, request);
-		} catch(RuntimeException e) {
+		} catch (RuntimeException e) {
 			log.info(e.getMessage());
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
@@ -54,9 +56,9 @@ public class BoardController {
 	@GetMapping("/{id}")
 	public ResponseEntity<Object> getById(@PathVariable Long id) {
 		BoardDto response = null;
-		try{
+		try {
 			response = boardService.getById(id);
-		} catch(RuntimeException e) {
+		} catch (RuntimeException e) {
 			log.info(e.getMessage());
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
@@ -65,15 +67,27 @@ public class BoardController {
 	}
 
 	@PatchMapping("/{id}")
-	public ResponseEntity<Object> updateById(@PathVariable Long id, @RequestBody CreateBoardDto requestDto, HttpServletRequest request, HttpSession session) {
+	public ResponseEntity<Object> updateById(@PathVariable Long id, @RequestBody CreateBoardDto requestDto,
+		HttpServletRequest request, HttpSession session) {
 		BoardDto response = null;
 		try {
 			response = boardService.updateById(id, requestDto, request, session);
-		} catch(RuntimeException e) {
+		} catch (RuntimeException e) {
 			log.info(e.getMessage());
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 		return new ResponseEntity<>(response, HttpStatus.OK);
 
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<String> deleteById(@PathVariable Long id, HttpServletRequest request, HttpSession session) {
+		try {
+			boardService.deleteById(id, request, session);
+		} catch (RuntimeException e) {
+			log.info(e.getMessage());
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>("게시글 삭제 성공", HttpStatus.OK);
 	}
 }
