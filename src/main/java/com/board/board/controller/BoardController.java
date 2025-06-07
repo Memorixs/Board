@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -61,5 +62,18 @@ public class BoardController {
 		}
 
 		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	@PatchMapping("/{id}")
+	public ResponseEntity<Object> updateById(@PathVariable Long id, @RequestBody CreateBoardDto requestDto, HttpServletRequest request, HttpSession session) {
+		Board board = null;
+		try {
+			board = boardService.updateById(id, requestDto, request, session);
+		} catch(RuntimeException e) {
+			log.info(e.getMessage());
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>(board, HttpStatus.OK);
+
 	}
 }

@@ -17,10 +17,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter
 @NoArgsConstructor
+@Setter
 public class Board {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,7 +53,8 @@ public class Board {
 	public static List<BoardDto> entityToDto(List<Board> boards) {
 		return boards.stream()
 			.map(board ->
-				new BoardDto(board.getId(), board.getTitle(), board.getContent(), board.getCreatedAt(), board.getUpdatedAt()))
+				new BoardDto(board.getId(), board.getTitle(), board.getContent(), board.getCreatedAt(),
+					board.getUpdatedAt()))
 			.toList();
 	}
 
@@ -59,5 +63,13 @@ public class Board {
 			board.getUpdatedAt());
 	}
 
+	public void update(CreateBoardDto dto) {
+		String content = dto.getContent();
+		String title = dto.getTitle();
+
+		this.content = content != null ? content : this.content;
+		this.title = title != null ? title : this.title;
+		this.updatedAt = LocalDate.now();
+	}
 
 }

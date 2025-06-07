@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.util.Assert;
 
 import com.board.board.dto.BoardDto;
 import com.board.board.dto.CreateBoardDto;
@@ -32,15 +34,15 @@ public class BoardService {
 		String userId = getUserIdFromCookie(request);
 		User user = getUserById(session, userId);
 
-		Optional.ofNullable(user)
-			.orElseThrow(() -> new RuntimeException("해당 id 세션이 존재하지 않습니다. 세션 생성을 위해 다시 로그인해주세요. id: " + userId));
-
 		Board board = boardRepository.save(Board.from(requestDto, user));
 		return board.getId();
 	}
 
 	private User getUserById(HttpSession session, String id) {
-		return (User) session.getAttribute(id);
+		User user = (User) session.getAttribute(id);
+		Optional.ofNullable(user)
+			.orElseThrow(() -> new RuntimeException("해당 id 세션이 존재하지 않습니다. 세션 생성을 위해 다시 로그인해주세요. id: " + id));
+		return user;
 	}
 
 	private String getUserIdFromCookie(HttpServletRequest request) {
@@ -64,5 +66,27 @@ public class BoardService {
 		Board board = boardRepository.findById(id)
 			.orElseThrow(() -> new RuntimeException("게시판이 존재하지 않습니다."));
 		return Board.entityToDto(board);
+	}
+
+	@Transactional
+	public Board updateById(Long id, CreateBoardDto requestDto, HttpServletRequest request, HttpSession session) {
+		String userId = getUserIdFromCookie(request);
+		User user = getUserById(session, userId);
+		Board board = findById(id);
+
+		if (!checkAuthorization(user.getId(), board)) {
+			throw new RuntimeException("수정할 권한이 없습니다.");
+		}
+		board.update(requestDto);
+		return board;
+	}
+
+	private boolean checkAuthorization(Long userId, Board board) {
+		return userId.equals(board.getUser().getId());
+	}
+
+	private Board findById(Long id) {
+		return boardRepository.findById(id)
+			.orElseThrow(() -> new RuntimeException("게시판이 존재하지 않습니다."));
 	}
 }
