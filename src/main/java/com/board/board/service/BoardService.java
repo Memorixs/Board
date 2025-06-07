@@ -5,8 +5,6 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionalEventListener;
-import org.springframework.util.Assert;
 
 import com.board.board.dto.BoardDto;
 import com.board.board.dto.CreateBoardDto;
