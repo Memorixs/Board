@@ -1,11 +1,14 @@
 package com.board.board.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.board.board.dto.BoardDto;
 import com.board.board.dto.CreateBoardDto;
+import com.board.board.dto.ListType;
 import com.board.board.entity.Board;
 import com.board.board.repository.BoardRepository;
 import com.board.user.entity.User;
@@ -49,5 +52,11 @@ public class BoardService {
 			}
 		}
 		return id;
+	}
+
+	public ListType<BoardDto> getAll() {
+		List<Board> boards = boardRepository.findAll();
+		List<BoardDto> response = Board.entityToDto(boards);
+		return new ListType<BoardDto>(response.size(), response);
 	}
 }

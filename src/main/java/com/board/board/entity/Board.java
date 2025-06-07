@@ -1,7 +1,9 @@
 package com.board.board.entity;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import com.board.board.dto.BoardDto;
 import com.board.board.dto.CreateBoardDto;
 import com.board.user.entity.User;
 
@@ -44,5 +46,12 @@ public class Board {
 	public static Board from(CreateBoardDto dto, User user) {
 		return new Board(dto.getTitle(), dto.getContent(), user);
 	}
+
+	public static List<BoardDto> entityToDto(List<Board> boards) {
+		return boards.stream()
+			.map(board -> new BoardDto(board.getTitle(), board.getContent()))
+			.toList();
+	}
+
 
 }
