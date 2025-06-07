@@ -1,14 +1,17 @@
 package com.board.user.service;
 
+import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import com.board.user.dto.SignupDto;
+import com.board.user.dto.UserRequestDto;
 import com.board.user.entity.User;
 import com.board.user.repository.UserRepository;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,7 +22,7 @@ public class UserService {
 
 	private final UserRepository userRepository;
 
-	public ResponseEntity<String> signup(SignupDto request) {
+	public ResponseEntity<String> signup(UserRequestDto request) {
 		User user = userRepository.findByEmail(request.getEmail());
 		try {
 			Assert.isNull(user, "이미 존재하는 회원입니다.");
@@ -29,5 +32,18 @@ public class UserService {
 		}
 		user = userRepository.save(User.of(request));
 		return new ResponseEntity<>(user.getId().toString(), HttpStatus.OK);
+	}
+
+	public User signin(UserRequestDto request, HttpSession session) {
+		User user = userRepository.findByEmail(request.getEmail());
+		try {
+			Assert.notNull(user, "존재하지 않는 회원입니다.");
+			session.setAttribute(user.getId().toString(), user);
+		} catch(IllegalArgumentException e) {
+			log.info("존재하지 않는 회원입니다. email: {}", request.getEmail());
+			throw new IllegalArgumentException(e);
+		}
+		return user;
+
 	}
 }

@@ -1,19 +1,20 @@
 package com.board.user.entity;
 
-import com.board.user.dto.SignupDto;
+import com.board.user.dto.UserRequestDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @NoArgsConstructor
 @Getter
+@ToString
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +29,7 @@ public class User {
 		this.password = password;
 	}
 
-	public static User of(SignupDto dto) {
+	public static User of(UserRequestDto dto) {
 		return new User(dto.getEmail(), dto.getPassword());
 	}
 }
