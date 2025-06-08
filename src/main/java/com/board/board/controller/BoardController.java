@@ -1,9 +1,15 @@
 package com.board.board.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.logging.log4j.util.InternalException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -13,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.board.board.dto.BoardDto;
 import com.board.board.dto.CreateBoardDto;
@@ -25,8 +32,9 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@RestController
-@RequestMapping("/board")
+// @RestController
+@Controller
+@RequestMapping("/api/board")
 @RequiredArgsConstructor
 @Slf4j
 public class BoardController {
@@ -35,9 +43,13 @@ public class BoardController {
 	@PostMapping
 	public ResponseEntity<String> create(HttpServletRequest request, @RequestBody CreateBoardDto requestDto,
 		HttpSession session) {
+
 		Long id;
 		try {
 			id = boardService.save(requestDto, session, request);
+		} catch (InternalException e) {
+			log.info(e.getMessage());
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (RuntimeException e) {
 			log.info(e.getMessage());
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -71,7 +83,11 @@ public class BoardController {
 		HttpServletRequest request, HttpSession session) {
 		BoardDto response = null;
 		try {
+			log.info(requestDto.toString());
 			response = boardService.updateById(id, requestDto, request, session);
+		} catch (InternalException e) {
+			log.info(e.getMessage());
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (RuntimeException e) {
 			log.info(e.getMessage());
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -84,6 +100,9 @@ public class BoardController {
 	public ResponseEntity<String> deleteById(@PathVariable Long id, HttpServletRequest request, HttpSession session) {
 		try {
 			boardService.deleteById(id, request, session);
+		} catch (InternalException e) {
+			log.info(e.getMessage());
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (RuntimeException e) {
 			log.info(e.getMessage());
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
