@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${board.title}">게시글 제목</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .post-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #e9ecef;
+        }
+
+        .post-content {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #495057;
+            margin-bottom: 40px;
+            min-height: 200px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #5a6268, #495057);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 5px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .post-title {
+                font-size: 1.5em;
+            }
+
+            .post-content {
+                font-size: 1em;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📄 게시글 상세보기</h1>
+    </div>
+
+    <div id="displayTag" class="content" th:object="${board}">
+        <!-- 게시글 제목 -->
+        <h2 class="post-title" th:text="*{title}">게시글 제목이 여기에 표시됩니다</h2>
+
+        <!-- 게시글 내용 -->
+        <div class="post-content" th:text="*{content}">
+            게시글 내용이 여기에 표시됩니다.
+            여러 줄의 내용이 있을 경우
+            줄바꿈이 적용되어 보여집니다.
+        </div>
+
+        <!-- 뒤로가기 버튼 -->
+        <div class="button-container">
+            <a href="/board/all" class="back-button">
+                ← 목록으로 돌아가기
+            </a>
+        </div>
+        <div class="button-container">
+            <button id="modifyButton" type="button" th:href="@{/board/{id}(id=${board.id})}" class="back-button">
+                수정하기
+            </button>
+        </div>
+        <div class="button-container">
+            <button id="deleteButton" type="button" class="back-button">
+                삭제하기
+            </button>
+        </div>
+    </div>
+
+    <div id="modifyTag" style="display: none" class="content" th:object="${board}">
+        <!-- 게시글 제목 -->
+        <form id="modifyFrom">
+            <label>제목</label>
+            <input name="title" class="post-title" th:placeholder="*{title}">
+
+            <!-- 게시글 내용 -->
+            <label>content</label>
+            <input name="content" class="post-content" th:placeholder="*{content}">
+            </input>
+
+            <!-- 뒤로가기 버튼 -->
+            <div class="button-container">
+                <a th:href="@{/board/{id}(id=*{id})}" class="back-button">
+                    취소
+                </a>
+            </div>
+            <div class="button-container">
+                <button id="confirm" type="button" th:href="@{/board/{id}(id=*{id})}" class="back-button">
+                    확인
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+<script src="/js/modifyBoard.js"></script>
+<script src="/js/fetchApi.js"></script>
+<script th:inline="javascript">
+    const button = document.getElementById("modifyButton");
+    const id = /*[[${board.id}]]*/"1";
+    modifyBoard(button);
+
+    const confirm = document.getElementById("confirm");
+    const form = document.getElementById("modifyFrom");
+    confirmBoard(form, confirm, id);
+
+    const deleteButton = document.getElementById("deleteButton");
+    deleteButton.addEventListener("click", async (e) =>{
+        try{
+            const data = await deleteBoard(id);
+            console.log(data);
+            alert("삭제되었습니다.");
+            location.href = "/board/all"
+
+        }catch(error) {
+            console.log(error);
+            alert(error.message);
+            location.reload();
+        }
+
+    })
+
+</script>
+</body>
+</html>
