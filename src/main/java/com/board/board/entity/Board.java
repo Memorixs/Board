@@ -51,24 +51,30 @@ public class Board {
 
 	public static List<BoardDto> entityToDto(List<Board> boards) {
 		return boards.stream()
-			.map(board ->
-				new BoardDto(board.getId(), board.getTitle(), board.getContent(), board.getCreatedAt(),
-					board.getUpdatedAt()))
-			.toList();
+			.map(Board::entityToDto).toList();
 	}
 
 	public static BoardDto entityToDto(Board board) {
+		String email = getEmailFromBoard(board);
 		return new BoardDto(board.getId(), board.getTitle(), board.getContent(), board.getCreatedAt(),
-			board.getUpdatedAt());
+			board.getUpdatedAt(), email);
+	}
+
+	private static String getEmailFromBoard(Board board) {
+		return board.getUser() == null ? "알수없음" : board.getUser().getEmail();
 	}
 
 	public void update(CreateBoardDto dto) {
 		String content = dto.getContent();
 		String title = dto.getTitle();
 
-		this.content = content != null ? content : this.content;
-		this.title = title != null ? title : this.title;
+		this.content = !content.isBlank() ? content : this.content;
+		this.title = !title.isBlank() ? title : this.title;
 		this.updatedAt = LocalDate.now();
+	}
+
+	static public void deleteUser(List<Board> boards) {
+		boards.forEach(board -> board.setUser(null));
 	}
 
 }

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시글 작성</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 1.1rem;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 200px;
+            line-height: 1.6;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+            flex: 0 0 auto;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: #3498db;
+            border: 2px solid #3498db;
+        }
+
+        .btn-outline:hover {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .form-note {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="page-title">게시글 작성</h1>
+
+    <!-- 성공 메시지 (조건부 표시) -->
+    <div th:if="${success}" class="success-message">
+        <strong>성공!</strong> 게시글이 성공적으로 작성되었습니다.
+    </div>
+
+    <!-- 게시글 작성 폼 -->
+    <form id="boardForm">
+        <div class="form-group">
+            <label for="title">제목 <span class="required">*</span></label>
+            <input type="text"
+                   id="title"
+                   name="title"
+                   placeholder="게시글 제목을 입력하세요"
+                   required>
+            <div class="error-message"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="content">내용 <span class="required">*</span></label>
+            <textarea id="content"
+                      name="content"
+                      placeholder="게시글 내용을 입력하세요"
+                      required></textarea>
+            <div class="error-message"></div>
+        </div>
+
+        <div class="button-group">
+            <button id="post" type="submit" class="btn btn-primary">게시글 작성</button>
+            <button id="boardList" type="button" class="btn btn-outline">목록으로</button>
+        </div>
+    </form>
+
+    <div class="form-note">
+        <span class="required">*</span> 표시된 항목은 필수 입력 사항입니다.
+    </div>
+</div>
+<script src="/js/fetchApi.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const boardListButton = document.getElementById("boardList");
+        boardListButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            location.href = "http://localhost:8080/board/all";
+        });
+
+        const form = document.getElementById("boardForm");
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            try{
+                const response = await createBoard(form); //await는 비동기 함수가 작업이 끝날때 까지 기다리는 것, 요청에 성공하면 Response 객체가 된다.
+                if(response.status == 400) { //json 으로 파싱 전에 예외처리해주어야함. 실패응답이면 Json 파싱할때 오류가 터지므로
+                    // console.log("실패" , data.json());
+                    throw new Error(response.message || "로그인 후 이용해주세요.") //실패 상태인 프로미스 반환
+                }
+                const id = await response.json(); //프로미스 객체에서 json 데이터가져오기
+                location.href = "/board/" + id;
+            } catch(error) {
+                console.log(error);
+                alert(error.message)
+            }
+        })
+
+    });
+
+</script>
+</body>
+</html>

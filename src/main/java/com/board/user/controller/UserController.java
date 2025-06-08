@@ -1,12 +1,16 @@
 package com.board.user.controller;
 
+import org.apache.logging.log4j.util.InternalException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.board.board.dto.Response;
 import com.board.user.dto.UserRequestDto;
 import com.board.user.entity.User;
 import com.board.user.service.UserService;
@@ -20,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api")
 @Slf4j
 public class UserController {
 
@@ -27,7 +32,13 @@ public class UserController {
 
 	@PostMapping("/signup")
 	public ResponseEntity<String> signup(@RequestBody UserRequestDto request) {
-		return userService.signup(request);
+		try{
+			userService.signup(request);
+		} catch(RuntimeException e) {
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>("회원가입 성공", HttpStatus.OK);
+
 	}
 
 	@PostMapping("/signin")
@@ -35,9 +46,8 @@ public class UserController {
 		HttpSession session) {
 		User user = null;
 		try {
-			user = userService.signin(request, session);
-			Cookie cookie = new Cookie("id", user.getId().toString());
-			response.addCookie(cookie);
+			user = userService.signin(request, session, response);
+
 		} catch (IllegalArgumentException e) {
 			return new ResponseEntity<>("존재하지 않는 회원입니다.", HttpStatus.BAD_REQUEST);
 		}
@@ -54,5 +64,34 @@ public class UserController {
 			}
 		}
 		log.info("get User from session: {}", user.toString());
+	}
+
+	@PostMapping("/logout")
+	public ResponseEntity<String> logout(HttpServletRequest request, HttpSession session, HttpServletResponse response) {
+		try {
+			userService.logout(request, session, response);
+		}catch (InternalException e) {
+			log.info(e.getMessage());
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (RuntimeException e) {
+			log.info(e.getMessage());
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		return ResponseEntity.ok("로그아웃 성공");
+	}
+
+	@DeleteMapping("/users")
+	public ResponseEntity<String> deletedAccount(HttpServletRequest request, HttpSession session, HttpServletResponse response)  {
+		try{
+			userService.delete(request, session, response);
+		}catch (InternalException e) {
+			log.info(e.getMessage());
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (RuntimeException e) {
+			log.info(e.getMessage());
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+
+		return ResponseEntity.ok("회원탈퇴 성공");
 	}
 }
