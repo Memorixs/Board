@@ -1,15 +1,9 @@
 package com.board.board.controller;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.logging.log4j.util.InternalException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,14 +11,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
 
 import com.board.board.dto.BoardDto;
 import com.board.board.dto.CreateBoardDto;
 import com.board.board.dto.ListType;
-import com.board.board.entity.Board;
+
 import com.board.board.service.BoardService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,10 +39,10 @@ public class BoardController {
 		try {
 			id = boardService.save(requestDto, session, request);
 		} catch (InternalException e) {
-			log.info(e.getMessage());
+			log.info(e.getMessage(), e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (RuntimeException e) {
-			log.info(e.getMessage());
+			log.info(e.getMessage(), e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 		return new ResponseEntity<>(String.valueOf(id), HttpStatus.OK);
@@ -71,7 +62,7 @@ public class BoardController {
 		try {
 			response = boardService.getById(id);
 		} catch (RuntimeException e) {
-			log.info(e.getMessage());
+			log.info(e.getMessage(), e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 
@@ -86,10 +77,10 @@ public class BoardController {
 			log.info(requestDto.toString());
 			response = boardService.updateById(id, requestDto, request, session);
 		} catch (InternalException e) {
-			log.info(e.getMessage());
+			log.info(e.getMessage(), e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (RuntimeException e) {
-			log.info(e.getMessage());
+			log.info(e.getMessage(), e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 		return new ResponseEntity<>(response, HttpStatus.OK);
@@ -101,10 +92,10 @@ public class BoardController {
 		try {
 			boardService.deleteById(id, request, session);
 		} catch (InternalException e) {
-			log.info(e.getMessage());
+			log.info(e.getMessage(), e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (RuntimeException e) {
-			log.info(e.getMessage());
+			log.info(e.getMessage(), e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 		return new ResponseEntity<>("게시글 삭제 성공", HttpStatus.OK);

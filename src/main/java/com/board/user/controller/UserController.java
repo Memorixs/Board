@@ -35,6 +35,7 @@ public class UserController {
 		try{
 			userService.signup(request);
 		} catch(RuntimeException e) {
+			log.info(e.getMessage(), e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 		return new ResponseEntity<>("회원가입 성공", HttpStatus.OK);
@@ -49,6 +50,7 @@ public class UserController {
 			user = userService.signin(request, session, response);
 
 		} catch (IllegalArgumentException e) {
+			log.info(e.getMessage(), e);
 			return new ResponseEntity<>("존재하지 않는 회원입니다.", HttpStatus.BAD_REQUEST);
 		}
 		log.info("session name: {}", session.getAttribute(user.getId().toString()).toString());
@@ -71,10 +73,10 @@ public class UserController {
 		try {
 			userService.logout(request, session, response);
 		}catch (InternalException e) {
-			log.info(e.getMessage());
+			log.info(e.getMessage(), e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (RuntimeException e) {
-			log.info(e.getMessage());
+			log.info(e.getMessage(), e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 		return ResponseEntity.ok("로그아웃 성공");
@@ -85,10 +87,10 @@ public class UserController {
 		try{
 			userService.delete(request, session, response);
 		}catch (InternalException e) {
-			log.info(e.getMessage());
+			log.info(e.getMessage(), e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (RuntimeException e) {
-			log.info(e.getMessage());
+			log.info(e.getMessage(), e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 
