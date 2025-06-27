@@ -1,5 +1,7 @@
 package com.board.user.entity;
 
+import java.io.Serializable;
+
 import com.board.user.dto.UserRequestDto;
 
 import jakarta.persistence.Column;
@@ -15,7 +17,8 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @ToString
-public class User {
+public class User implements Serializable {
+	private static final long serialVersionUID = 1L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

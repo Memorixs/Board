@@ -28,25 +28,23 @@ public class BoardService {
 
 	@Transactional
 	public Long save(CreateBoardDto requestDto, HttpSession session, HttpServletRequest request) {
-		String userId = getUserIdFromCookie(request);
-		log.info(userId);
-		User user = getUserById(session, userId);
+		User user = (User) session.getAttribute("user");
 
 		Board board = boardRepository.save(Board.from(requestDto, user));
 		return board.getId();
 	}
 
 	private User getUserById(HttpSession session, String id) {
-		User user = (User) session.getAttribute(id);
+		User user = (User) session.getAttribute("user"); //새로운 요청이여도 세션이 삭제되지 않았음. 쿠키의 SESSIONID으로 DB에서 조회
 		Optional.ofNullable(user)
 			.orElseThrow(() -> new InternalException("서버 내부에서 에러가 발생하였습니다."));
 		return user;
 	}
 
-	public static String getUserIdFromCookie(HttpServletRequest request) {
+	public static String getSessionIdFromCookie(HttpServletRequest request) {
 		String id = null;
 		for (Cookie cookie : request.getCookies()) {
-			if(cookie.getName().equals("id")) {
+			if(cookie.getName().equals("SESSION")) {
 				id = cookie.getValue();
 				break;
 			}
@@ -71,10 +69,8 @@ public class BoardService {
 
 	@Transactional
 	public BoardDto updateById(Long id, CreateBoardDto requestDto, HttpServletRequest request, HttpSession session) {
-		String userId = getUserIdFromCookie(request);
-		User user = getUserById(session, userId);
+		User user = (User) session.getAttribute("user");
 		Board board = findById(id);
-		log.info(userId);
 
 		if (!checkAuthorization(user.getId(), board)) {
 			throw new RuntimeException("수정할 권한이 없습니다.");
@@ -97,8 +93,10 @@ public class BoardService {
 
 	@Transactional
 	public void deleteById(Long id, HttpServletRequest request, HttpSession session) {
-		String userId = getUserIdFromCookie(request);
-		User user = getUserById(session, userId);
+		String sessionId = getSessionIdFromCookie(request);
+		//delete session from db
+
+		User user = (User) session.getAttribute("user");
 		Board board = findById(id);
 		if (!checkAuthorization(user.getId(), board)) {
 			throw new RuntimeException("삭제할 권한이 없습니다.");

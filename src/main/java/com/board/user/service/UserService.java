@@ -40,11 +40,11 @@ public class UserService {
 		return user.getId();
 	}
 
-	public User signin(UserRequestDto request, HttpSession session, HttpServletResponse response) {
+	public User signin(UserRequestDto request, HttpServletResponse response, HttpServletRequest req) {
 		User user = userRepository.findByEmail(request.getEmail());
 		try {
 			Assert.notNull(user, "존재하지 않는 회원입니다.");
-			session.setAttribute(user.getId().toString(), user);
+			req.getSession(true).setAttribute("user", user);
 			Cookie cookie = createCookie(user.getId());
 			response.addCookie(cookie);
 		} catch(IllegalArgumentException e) {
@@ -72,23 +72,26 @@ public class UserService {
 	}
 
 	private Long deletedSession(HttpServletRequest request, HttpSession session) {
-		String id = BoardService.getUserIdFromCookie(request);
-		session.removeAttribute(id);
-		return Long.parseLong(id);
+		// String sessionId = BoardService.getUserIdFromCookie(request);
+		User user = (User) session.getAttribute("user"); //session 에서 가져오면 새로운 요청일 경우 에러초
+		session.invalidate(); //현재 세션 만료 + db에서도 삭제된다.
+		//sessionId로 유저 찾아와야함.
+		return user.getId();
 	}
 
 	private void deleteCookie(HttpServletResponse response) {
-		Cookie cookie = new Cookie("id", "");
-		cookie.setPath("/api");
+		Cookie cookie = new Cookie("SESSION", "");
+		cookie.setPath("/");
 		cookie.setMaxAge(0); // 즉시 만료
 		response.addCookie(cookie);
 	}
 
 	private Cookie createCookie(Long id) {
 		Cookie cookie = new Cookie("id", id.toString());
-		cookie.setPath("/api");
+		cookie.setPath("/");
 		cookie.setHttpOnly(true);
 		cookie.setMaxAge(60 * 60 * 24 * 7); //1주일 초단위
+		// cookie.setAttribute("expires", );
 		return cookie;
 	}
 }

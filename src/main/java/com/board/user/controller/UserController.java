@@ -43,17 +43,18 @@ public class UserController {
 	}
 
 	@PostMapping("/signin")
-	public ResponseEntity<String> signin(@RequestBody UserRequestDto request, HttpServletResponse response,
-		HttpSession session) {
+	public ResponseEntity<String> signin(@RequestBody UserRequestDto request, HttpServletResponse response, HttpServletRequest req) {
 		User user = null;
+		//이미 로그인이 되어 있다면 기존 세션 재사용하면 된다. 로그인 하는 경우는 로그아웃 후 할 수 있으므로 매번 새로운 세션을 생성할 필요가 없다.
+		// req.getSession(true);
 		try {
-			user = userService.signin(request, session, response);
+			user = userService.signin(request, response, req);
 
 		} catch (IllegalArgumentException e) {
 			log.info(e.getMessage(), e);
 			return new ResponseEntity<>("존재하지 않는 회원입니다.", HttpStatus.BAD_REQUEST);
 		}
-		log.info("session name: {}", session.getAttribute(user.getId().toString()).toString());
+		log.info("session name: {}", req.getSession().getAttribute("user"));
 		return new ResponseEntity<>(user.getId().toString(), HttpStatus.OK);
 	}
 
